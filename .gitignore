@@ -8,6 +8,7 @@ docs/build
 *egg-info
 .tox
 venv
+.venv
 build
 dist
 .idea
