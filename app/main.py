@@ -1,14 +1,19 @@
+<<<<<<< HEAD
 from typing import List
 from fastapi import FastAPI, HTTPException, Response, status, Depends
 
 # 这里的Depends是fastapi所需要的函数，作为参数输入进每个method里
+=======
+from fastapi import FastAPI, HTTPException, Response, status
+>>>>>>> parent of 2e0a27d (SqlAlchemy modified)
 # 这里的Response类型，可以定义页面的返回类型，例如response.status_code = 404
 from fastapi.params import Body
+from pydantic import BaseModel
 import random
-
 import psycopg2
 from psycopg2.extras import RealDictCursor
 import time
+<<<<<<< HEAD
 from sqlalchemy.orm import Session
 from . import models, schemas, utils  # 这个就是把models文件导入的意思
 from .database import engine, get_db
@@ -17,6 +22,8 @@ from .routers import post, user, auth
 
 # 这句和get_db都是从fastapi sql配置里抄的
 models.Base.metadata.create_all(bind=engine)
+=======
+>>>>>>> parent of 2e0a27d (SqlAlchemy modified)
 
 
 # docs 可用 http://127.0.0.1:8000/docs 或者 http://127.0.0.1:8000/redocs 生成
@@ -26,7 +33,18 @@ app = FastAPI()
 # 当把main.py移动至app文件夹后，运行uvicorn app.main:app --reload
 # 用postman去监测server运行，body里面输入数据，json类似于dict
 
+# pydantic的作用是验证变量的类型，新建类Post，extend类BaseModel
+# 用new_post.title即可找到title变量
+# 用new_post.dict()即可转为dict类型变量
 
+<<<<<<< HEAD
+=======
+class Post(BaseModel):
+    title: str
+    content: str
+    published: bool = True
+
+>>>>>>> parent of 2e0a27d (SqlAlchemy modified)
 # postgresql 使用：可以自己创建一个server，里面创建很多database，database里面有很多table (schemas --> table)，可以view data
 # 我们要用psycopg去在python上运行postgresql，因此要pip install psycopg2-binary
 # (see in https://www.psycopg.org/docs/install.html#quick-install)
@@ -52,6 +70,7 @@ while True:
             2
         )  # 加上外面的while循环，以及完成时的break，构成了不断去连数据库的一个操作，2秒连一次
 
+<<<<<<< HEAD
 # psycopg仍然是建立在SQL语言上的，而SQL Alchemy是ORM（Object Retional Mapper），直接用面向对象的语言去查询数据库
 # 对象关系映射：将数据库表、列、关系等元素映射到面向对象的类、属性和关系。
 # 查询语言：提供一种高级别的查询语言，使开发人员可以使用面向对象的语法来查询数据库，而无需直接编写SQL语句。
@@ -59,14 +78,18 @@ while True:
 # 而且，记住！我们在用psycopg的时候，我们的table是手动在postgresql里面搭的，但SQLAlchemy里面，我们可以通过编程自动生成table
 
 my_posts = [{"title": "title1", "content": "content1", "published": True, "id": 1}]
+=======
+my_posts =[{"title":"title1", "content":"content1", "published":True,"id":1}]
+>>>>>>> parent of 2e0a27d (SqlAlchemy modified)
 
-# def find_by_id(id:int):
-#     for p in my_posts:
-#         if p["id"] == id:
-#             return p
-#     return None
+def find_by_id(id:int):
+    for p in my_posts:
+        if p["id"] == id:
+            return p
+    return None
 
 
+<<<<<<< HEAD
 app.include_router(post.router)
 app.include_router(user.router)
 # 把post.router和user.router 放在app里
@@ -77,3 +100,66 @@ app.include_router(auth.router)
 # decorator非常重要，get是method，“/”表明了actual path operation
 def root():
     return {"message": "this is fastapi app."}
+=======
+@app.get("/")
+# decorator非常重要，get是method，“/”表明了actual path operation
+def root():
+    return {"message":"this is fastapi app."}
+
+@app.get("/posts")
+def get_posts():
+    cursor.execute("""SELECT * FROM posts""")
+    posts = cursor.fetchall()
+    print(posts)
+    return {"posts":posts}
+
+@app.post("/createposts")
+# 之前写的是payload: dict = Body(...)
+# 这里payload是变量名，dict表明类型，Body是fastapi的参数，表明Body里面的所有输入的数据都以dict的形式存进payload里
+def create_posts(post:Post):
+    #print(new_post) #用途不大，在terminal里面显示，只有写在return里面，才会真正在网页里面显示
+    # my_post = {}
+    # my_post['title'] = post.title
+    # my_post['content'] = post.content
+    # my_post['published'] = post.published
+    # my_post['id'] = random.randint(1,500000)
+    # my_posts.append(my_post)
+    cursor.execute("""INSERT INTO posts (title, content, published) VALUES (%s,%s,%s) RETURNING *""",(post.title,post.content,post.published))
+    # 这里SQL语句加上RETURNING * 表示任何时候插入了一行元素，都会返回插入的元素的情况
+    # 这里id一定要在postgresql里面定义为serial，不能是integer，因为插入的时候是默认按顺序插入的
+    new_post = cursor.fetchone()
+    conn.commit()
+    # 不加commit的话，不会把数据存进database里面
+    return {"create a new post": new_post}
+
+@app.get("/posts/{id}")
+def get_post(id:int):
+    # my_post =find_by_id(id)
+    cursor.execute("""SELECT * FROM posts WHERE id = %s""",str(id))
+    my_post = cursor.fetchone()
+    if not my_post:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,detail=f"cannot find post {id}")
+    else:
+        return {f"this is the post {id}": my_post}
+
+@app.put("/posts/{id}")
+def put_post(id:int,post:Post):
+    my_post =find_by_id(id)
+    if not my_post:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,detail=f"cannot find post {id}")
+    else:
+        my_post["id"] = id
+        my_post['title'] = post.title
+        my_post['content'] = post.content
+        my_post['published'] = post.published
+        return {f"this is the updated post {id}": my_post}
+
+@app.delete("/posts/{id}")
+def delete_post(id:int):
+    my_post =find_by_id(id)
+    if not my_post:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,detail=f"cannot find post {id}")
+    else:
+        my_posts.remove(my_post)
+        return {f"this is the deleted post {id}": my_post}
+>>>>>>> parent of 2e0a27d (SqlAlchemy modified)
