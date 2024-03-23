@@ -3,10 +3,11 @@ from sqlalchemy.orm import Session
 from .. import models, schemas, utils
 from ..database import get_db
 
-router = APIRouter(prefix="/users", tags = ['Users'])
+router = APIRouter(prefix="/users", tags=["Users"])
 
-@router.post("/", status_code=status.HTTP_201_CREATED,response_model=schemas.UserOut)
-def create_users(user:schemas.UserCreate,db: Session = Depends(get_db)):
+
+@router.post("/", status_code=status.HTTP_201_CREATED, response_model=schemas.UserOut)
+def create_users(user: schemas.UserCreate, db: Session = Depends(get_db)):
     user.password = utils.hash(user.password)
     new_user = models.Users(**user.model_dump())
     db.add(new_user)
