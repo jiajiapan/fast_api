@@ -32,8 +32,13 @@ class Users(Base):
     email = Column(String, nullable=False, unique=True)
     password = Column(String, nullable=False)
 
+
 class Vote(Base):
     __tablename__ = "votes"
-    user_id = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"),primary_key=True)
-    post_id = Column(Integer, ForeignKey("posts.id", ondelete="CASCADE"),primary_key=True)
+    user_id = Column(
+        Integer, ForeignKey("users.id", ondelete="CASCADE"), primary_key=True
+    )
+    post_id = Column(
+        Integer, ForeignKey("posts.id", ondelete="CASCADE"), primary_key=True
+    )
     # 这种两个primary key的写法叫做composite primary key，当这两个变量均不相同的时候，才会报错

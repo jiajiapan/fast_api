@@ -17,8 +17,11 @@ router = APIRouter(prefix="/posts", tags=["Posts"])
 @router.get("/", response_model=List[schemas.PostOut])
 # @router.get("/")
 def get_posts(
-    db: Session = Depends(get_db), current_user: int = Depends(oauth2.get_current_user),limit: int = 20,
-    skip: int = 0, search: Optional[str] = ""
+    db: Session = Depends(get_db),
+    current_user: int = Depends(oauth2.get_current_user),
+    limit: int = 20,
+    skip: int = 0,
+    search: Optional[str] = "",
 ):
     # limit表示列出的post数量限制变量，默认为10，如果网址后缀注明?limit=3，那么就是3
     # 多个参数限制，那就加&
@@ -26,7 +29,11 @@ def get_posts(
     # posts = cursor.fetchall()
     # print(posts)
     # posts = db.query(models.Post).filter(models.Post.title.contains(search)).limit(limit).offset(skip).all()
-    results = db.query(models.Post, func.count(models.Vote.post_id).label("votes")).join(models.Vote, models.Vote.post_id==models.Post.id, isouter=True).group_by(models.Post.id)
+    results = (
+        db.query(models.Post, func.count(models.Vote.post_id).label("votes"))
+        .join(models.Vote, models.Vote.post_id == models.Post.id, isouter=True)
+        .group_by(models.Post.id)
+    )
     return results
 
 
@@ -60,7 +67,7 @@ def create_posts(
     # ** 是unpack的意思，就可以按照dict的内容去导入
     # Basemodel 后面可以直接用.dict()去变成字典，但是该方法将被弃用，可以用model_dump()去实现
     # print(current_user.id)
-    new_post = models.Post(owner_id = current_user.id, **post.model_dump())
+    new_post = models.Post(owner_id=current_user.id, **post.model_dump())
     db.add(new_post)
     db.commit()
     db.refresh(new_post)
@@ -83,7 +90,7 @@ def get_post(
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND, detail=f"cannot find post {id}"
         )
-    
+
     return post
 
 
@@ -107,7 +114,10 @@ def update_post(
             status_code=status.HTTP_404_NOT_FOUND, detail=f"cannot find post {id}"
         )
     if post.owner_id != int(current_user.id):
-        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Not authorized to perform requested action")
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Not authorized to perform requested action",
+        )
 
     post_query.update(updated_post.model_dump(), synchronize_session=False)
     # 像delete update可以直接在post_query上操作，非常简单
@@ -138,10 +148,13 @@ def delete_post(
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND, detail=f"cannot find post {id}"
         )
-    
+
     if post.owner_id != int(current_user.id):
-        return HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Not authorized to perform requested action")
-    
+        return HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Not authorized to perform requested action",
+        )
+
     post_query.delete(synchronize_session=False)
     db.commit()
     # my_posts.remove(my_post)

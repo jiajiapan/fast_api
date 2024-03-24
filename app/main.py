@@ -29,8 +29,7 @@ app = FastAPI()
 # 用new_post.dict()即可转为dict类型变量
 
 
-
-def find_by_id(id:int):
+def find_by_id(id: int):
     for p in my_posts:
         if p["id"] == id:
             return p

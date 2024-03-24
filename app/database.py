@@ -5,6 +5,7 @@ from sqlalchemy.orm import sessionmaker
 import psycopg2
 from psycopg2.extras import RealDictCursor
 from .config import settings
+
 # 导入settings，并在后面引用settings.XXXX
 
 # 为了用SQLAlchemy才做的这个文件，see in https://fastapi.tiangolo.com/tutorial/sql-databases/
@@ -30,6 +31,7 @@ def get_db():
         yield db
     finally:
         db.close()
+
 
 # postgresql 使用：可以自己创建一个server，里面创建很多database，database里面有很多table (schemas --> table)，可以view data
 # 我们要用psycopg去在python上运行postgresql，因此要pip install psycopg2-binary
