@@ -9,6 +9,7 @@ docs/build
 .tox
 venv
 .venv
+.env
 build
 dist
 .idea
