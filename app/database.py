@@ -20,6 +20,8 @@ engine = create_engine(SQLALCHEMY_DATABASE_URL)
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
 Base = declarative_base()
+# 这句是SQLAlchemy中用于创建ORM基类的语句
+# 要import这个Base object进入alembic的env文件
 
 
 # 带yield都是一个生成器函数，这时候会暂停执行，返回db给调用方，当调用方需要下一个值的时候，生成器会继续执行，知道再次遇到yield，就会再次返回一个值
@@ -37,26 +39,26 @@ def get_db():
 # 我们要用psycopg去在python上运行postgresql，因此要pip install psycopg2-binary
 # (see in https://www.psycopg.org/docs/install.html#quick-install)
 
-while True:
-    try:
-        conn = psycopg2.connect(
-            host="localhost",
-            database="fastapi",
-            user="postgres",
-            password="jiajia",
-            cursor_factory=RealDictCursor,
-        )
-        # cursor_factory=RealDictCursor 是针对 psycopg2 库的参数设置
-        # 用于创建一个“真实字典游标”（RealDictCursor）。当使用该参数时，查询结果将以字典的形式返回，
-        # 其中键是列名，值是对应列的值。这样的设置能够使得查询结果更易于使用，并且提供了更直观的方式来处理结果集中的数据。
-        cursor = conn.cursor()
-        print("Database connection was successful!")
-        break
-    except Exception as error:
-        print("Error: ", error)
-        time.sleep(
-            2
-        )  # 加上外面的while循环，以及完成时的break，构成了不断去连数据库的一个操作，2秒连一次
+# while True:
+#     try:
+#         conn = psycopg2.connect(
+#             host="localhost",
+#             database="fastapi",
+#             user="postgres",
+#             password="jiajia",
+#             cursor_factory=RealDictCursor,
+#         )
+#         # cursor_factory=RealDictCursor 是针对 psycopg2 库的参数设置
+#         # 用于创建一个“真实字典游标”（RealDictCursor）。当使用该参数时，查询结果将以字典的形式返回，
+#         # 其中键是列名，值是对应列的值。这样的设置能够使得查询结果更易于使用，并且提供了更直观的方式来处理结果集中的数据。
+#         cursor = conn.cursor()
+#         print("Database connection was successful!")
+#         break
+#     except Exception as error:
+#         print("Error: ", error)
+#         time.sleep(
+#             2
+#         )  # 加上外面的while循环，以及完成时的break，构成了不断去连数据库的一个操作，2秒连一次
 
 # psycopg仍然是建立在SQL语言上的，而SQL Alchemy是ORM（Object Retional Mapper），直接用面向对象的语言去查询数据库
 # 对象关系映射：将数据库表、列、关系等元素映射到面向对象的类、属性和关系。
@@ -64,4 +66,4 @@ while True:
 
 # 而且，记住！我们在用psycopg的时候，我们的table是手动在postgresql里面搭的，但SQLAlchemy里面，我们可以通过编程自动生成table
 
-my_posts = [{"title": "title1", "content": "content1", "published": True, "id": 1}]
+# my_posts = [{"title": "title1", "content": "content1", "published": True, "id": 1}]
