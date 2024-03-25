@@ -1,6 +1,7 @@
 # from typing import List
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+
 # 这里的Depends是fastapi所需要的函数，作为参数输入进每个method里
 # 这里的Response类型，可以定义页面的返回类型，例如response.status_code = 404
 # from fastapi.params import Body
@@ -23,7 +24,7 @@ app = FastAPI()
 # 它允许服务器指定哪些网站有权限访问其资源，以及哪些网站不具有访问权限。
 # 这里是指所有的网站都可以访问
 # 也可以写成 origins = ["https://www.google.com"]，就只有列表中的网站可以访问
- 
+
 origins = ["*"]
 
 app.add_middleware(
